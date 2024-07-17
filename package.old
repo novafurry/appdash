@@ -1,0 +1,14 @@
+{
+  "name": "appdash",
+  "version": "1.0.0",
+  "description": "appdash, a simple dashboard for webapps",
+  "main": "index.html",
+  "scripts": {
+    "start": "nw ."
+  },
+  "author": "NovaFurry (novafurry.win)",
+  "license": "MIT",
+  "dependencies": {
+    "nwjs": "^1.4.4"
+  }
+}

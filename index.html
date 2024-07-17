@@ -1,0 +1,434 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+    <style>
+        .dropzone:not(.taskbar) {
+            background-color: #1a1a1a;
+            /* min-width: 20vw; */
+            /* min-height: 20vh; */
+            display: inline-block;
+            flex: 1 1 calc(25% - 10px);
+        }
+
+        .AppItem {
+            border: 1px solid #aaaaaa;
+            display: inline-block;
+        }
+
+        .AppItem img,
+        .AppItem span {
+            display: block;
+            text-align: center;
+            user-select: none;
+            -webkit-user-drag: none;
+        }
+
+        body {
+            background-color: #1a1a1a;
+            color: #ffffff;
+            width: 100vw;
+            height: 100vh;
+            margin: 0px;
+            overflow: hidden;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+
+        .AppItem .leframe {
+            display: none;
+        }
+
+        .dropzone:not(.taskbar) .AppItem .leframe {
+            display: block;
+        }
+
+        .taskbar .AppItem {
+            width: fit-content;
+            height: fit-content;
+            padding: 5px;
+            text-align: center;
+            margin-right: 5px;
+            height: 75px;
+        }
+
+        .taskbar .AppItem img {
+            margin-left: auto;
+            margin-right: auto;
+            margin-bottom: 5px;
+        }
+
+        .dropzone:not(.taskbar) .AppItem img {
+            display: none;
+        }
+
+        body.dragging .currentTarget:not(.dropzone:first-of-type, :has(.AppItem)) {
+            background-color: #74bb5d87;
+            display: inline-block !important;
+            position: absolute;
+            left: 0px;
+            bottom: 110px;
+            width: 100vw;
+            height: calc(100vh - 110px);
+            z-index: 999999;
+        }
+
+        .taskbar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: calc(100vw - 26px);
+            display: block;
+            height: 85px;
+            padding: 10px;
+            border: 3px solid #aaaaaa;
+            background-color: #333333;
+        }
+
+        .dropzoneparent {
+            display: flex;
+            gap: 5px;
+            background-color: #ffffff;
+            height: calc(calc(100vh - 85px) - 26px);
+            max-height: calc(calc(100vh - 85px) - 26px);
+            flex-wrap: wrap;
+        }
+
+        .dropzone:not(.taskbar, .dropzone:nth-of-type(1)) {
+            display: none;
+        }
+
+        .dropzone.dropzone:not(.taskbar):has(.AppItem) {
+            display: inline-block;
+        }
+
+        body.dragging .dropzone:not(.taskbar):has(.AppItem)~.dropzone:not(.taskbar, :has(*)):first-of-type {
+            display: inline-block !important;
+            background-color: red;
+        }
+
+        .dropzone:not(.taskbar) .AppItem,
+        .dropzone:not(.taskbar) .AppItem .leframe,
+        .dropzone:not(.taskbar) .AppItem .leframe>* {
+            width: 100%;
+            height: 100%;
+        }
+
+        .dropzone:not(.taskbar) .AppItem .leframe {
+            display: block;
+            height: calc(100% - 20px) !important;
+        }
+
+        .dropzone:not(.taskbar) .AppItem span a {
+            display: inline;
+        }
+
+        .dropzone.taskbar .AppItem span a {
+            display: none;
+        }
+
+        .refbtn,
+        .dialogclose {
+            position: absolute;
+            right: 0px;
+            top: 0px;
+        }
+
+        .tools {
+            width: 24px;
+            display: inline-block;
+            margin-top: auto;
+            margin-bottom: auto;
+        }
+
+        #addAppDialog label {
+            width: 100px;
+            display: inline-block;
+        }
+
+        #addAppDialog form button {
+            width: 100%;
+        }
+
+        #addAppDialog form * {
+            margin-top: 5px;
+        }
+    </style>
+    <title>appdash</title>
+</head>
+
+<body>
+    <dialog id="addAppDialog">
+        <button class="dialogclose" onclick="this.parentElement.close()">x</button>
+        <form onsubmit="addapp(event)">
+            <h3>Add an Application</h3>
+            <label for="id">ID</label>
+            <input type="text" pattern="[a-zA-Z0-9]+" id="id" name="id" required><br>
+            <label for="iconLink">Icon Link</label>
+            <input type="url" id="iconLink" name="iconLink" required><br>
+            <label for="link">Link</label>
+            <input type="url" id="link" name="link" required><br>
+            <label for="name">Name</label>
+            <input type="text" id="name" name="name" required><br>
+            <button>Add</button>
+        </form>
+    </dialog>
+    <dialog id="deleteAppDialog">
+        <button class="dialogclose" onclick="this.parentElement.close()">x</button>
+        <h3>Delete an Application<br><small><i>Click an app to delete it</i></small></h3>
+        <div class="apps"></div>
+    </dialog>
+    <div class="dropzoneparent">
+        <div class="dropzone" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        <div class="dropzone" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        <div class="dropzone" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        <div class="dropzone" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        <div class="dropzone" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        <div class="dropzone" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        <div class="dropzone" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        <div class="dropzone" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        <div class="dropzone" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        <div class="dropzone" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        <div class="dropzone" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        <div class="dropzone" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        <div class="dropzone" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        <div class="dropzone" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        <div class="dropzone" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        <div class="dropzone" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        <div class="dropzone" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        <div class="dropzone" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        <div class="dropzone" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        <div class="dropzone" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        <div class="dropzone" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        <div class="dropzone" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        <div class="dropzone" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        <div class="dropzone" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        <div class="dropzone" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+    </div>
+    <div class="dropzone taskbar" ondrop="drop(event)" ondragover="allowDrop(event)">
+        <button class="refbtn" onclick="window.location.reload()">reload</button>
+        <div class="tools">
+            <svg onclick='document.querySelector("#addAppDialog").showModal()' xmlns="http://www.w3.org/2000/svg"
+                width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus">
+                <path d="M5 12h14" />
+                <path d="M12 5v14" />
+            </svg>
+            <svg onclick="showDelDiag()" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="lucide lucide-trash-2">
+                <path d="M3 6h18" />
+                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                <line x1="10" x2="10" y1="11" y2="17" />
+                <line x1="14" x2="14" y1="11" y2="17" />
+            </svg>
+        </div>
+    </div>
+    <script>
+        function allowDrop(ev) {
+            ev.preventDefault();
+        }
+
+        function drag(ev) {
+            ev.dataTransfer.setData("text", ev.target.id);
+        }
+
+        function drop(ev) {
+            ev.preventDefault();
+            var data = ev.dataTransfer.getData("text");
+            ev.target.appendChild(document.getElementById(data));
+            document.body.classList.remove("dragging");
+            // ev.dataTransfer.getData("target").style.display = "inline-block";
+            // ev.dataTransfer.getData("target").classList.remove("currentTarget");
+            document.querySelectorAll(".currentTarget:not(.taskbar, :has(.AppItem), .dropzone:first-of-type)").forEach(dropzone => {
+                dropzone.style.display = "none";
+                dropzone.classList.remove("currentTarget");
+            });
+        }
+        function simulateDragAndDrop(sourceNode, destinationNode) {
+
+
+            class MyDataTransfer {
+                constructor() {
+                    this.dropEffect = "all";
+                    this.effectAllowed = "all";
+                    this.files = [];
+                    this.items = new DataTransferItemList();
+                    this.types = [];
+                }
+                setData(format, data) {
+                    this.data[format] = data;
+                }
+                getData(format) {
+                    return this.data[format];
+                }
+                clearData(format = null) {
+                    if (format) {
+                        delete this.data[format];
+                    } else {
+                        this.data = {};
+                    }
+                }
+                clearData(type) {
+                    if (type) {
+                        const index = this.types.indexOf(type);
+                        if (index !== -1) {
+                            this.types.splice(index, 1);
+                        }
+                    } else {
+                        this.types = [];
+                    }
+                }
+
+                getData(type) {
+                    const index = this.types.indexOf(type);
+                    return index !== -1 ? this.items[index].data : '';
+                }
+
+                setData(type, data) {
+                    const index = this.types.indexOf(type);
+                    if (index !== -1) {
+                        this.items[index].data = data;
+                    } else {
+                        this.types.push(type);
+                        this.items.add(new DataTransferItem(type, data));
+                    }
+                }
+
+                setDragImage(imageElement, x, y) {
+                    // I do nothing here it's just to avoid errrs
+                }
+            }
+
+            class DataTransferItem {
+                constructor(type, data) {
+                    this.type = type;
+                    this.data = data;
+                }
+            }
+
+            class DataTransferItemList extends Array {
+                add(item) {
+                    this.push(item);
+                }
+            }
+            const EVENT_TYPES = {
+                DRAG_END: 'dragend',
+                DRAG_START: 'dragstart',
+                DROP: 'drop'
+            }
+            const dataTransfer = new MyDataTransfer();
+
+            function createCustomEvent(type) {
+                const event = new CustomEvent(type, {
+                    bubbles: true,
+                    cancelable: true
+                });
+                event.dataTransfer = dataTransfer;
+                return event;
+            }
+
+            let events = [];
+
+            // let myDataTransfer = new MyDataTransfer();
+            events.push(createCustomEvent(EVENT_TYPES.DRAG_START));
+
+            events.push(createCustomEvent(EVENT_TYPES.DROP));
+
+            // Dispatch dragstart and dragend events on the sourceNode
+            events.forEach((event) => sourceNode.dispatchEvent(event));
+
+            const dropEvent = createCustomEvent(EVENT_TYPES.DROP);
+            destinationNode.dispatchEvent(dropEvent);
+        }
+    </script>
+    <script type="module">
+        window.createApp = function (id, iconLink, link, name) {
+            var app = document.createElement("div");
+            app.className = "AppItem";
+            app.id = id;
+            app.draggable = true;
+            app.ondragstart = function (event) {
+                event.dataTransfer.setData("text", event.target.id || event.target.parentElement.id);
+                document.body.classList.add("dragging");
+                if (event.target.parentElement == document.querySelector(".taskbar") || event.target.parentElement.parentElement == document.querySelector(".taskbar")) {
+                    event.dataTransfer.setData("target", document.querySelector(".dropzone:not(.taskbar, :has(.AppItem))"));
+                    document.querySelector(".dropzone:not(.taskbar, :has(.AppItem))").style.display = "inline-block";
+                    document.querySelector(".dropzone:not(.taskbar, :has(.AppItem))").classList.add("currentTarget")
+                }
+            }
+            var icon = document.createElement("img");
+            icon.src = iconLink;
+            icon.height = 50;
+            app.appendChild(icon);
+            var title = document.createElement("span");
+            title.innerHTML = name + `  <b><a onclick='document.querySelector("#${id} webview").src = "${link}"'>⌂</a> <a onclick='document.querySelector("#${id} webview").goBack()'>&lt;</a> <a onclick='document.querySelector("#${id} webview").goForward()'>&gt;</a> <a onclick='document.querySelector("#${id} webview").reload()' oncontextmenu='document.querySelector("#${id} webview").reloadIgnoringCache()'>⟳</a>  <a onclick="simulateDragAndDrop(document.querySelector('#${id}'), document.querySelector('.taskbar'))">&times;</a></b>`;
+            app.appendChild(title);
+            var iframediv = document.createElement("div");
+            iframediv.classList.add("leframe");
+            app.appendChild(iframediv);
+            var iframe = document.createElement("webview");
+            iframe.src = link;
+            iframe.setAttribute("frameborder", "0");
+            iframediv.appendChild(iframe);
+            iframe.setAttribute('allowpopups', 'true');
+            // iframe.setAttribute("partition", `persist:appdash`);
+            document.querySelector(".taskbar").appendChild(app);
+        }
+        if (window.localStorage.getItem("config") == null) {
+            window.localStorage.setItem("config", JSON.stringify({
+                apps: [
+                    {
+                        id: "google",
+                        iconLink: "https://www.google.com/favicon.ico",
+                        link: "https://www.google.com",
+                        name: "Google"
+                    }
+                ]
+            }));
+        }
+        window.config = JSON.parse(window.localStorage.getItem("config"))
+        config.apps.forEach(app => {
+            createApp(app.id, app.iconLink, app.link, app.name);
+        });
+    </script>
+    <script>
+        function addapp(event) {
+            event.preventDefault();
+            var appname = document.querySelector("#name").value;
+            var appid = document.querySelector("#id").value;
+            var appicon = document.querySelector("#iconLink").value;
+            var applink = document.querySelector("#link").value;
+            createApp(appid, appicon, applink, appname);
+            window.config = JSON.parse(window.localStorage.getItem("config"));
+            config.apps.push({
+                id: appid,
+                iconLink: appicon,
+                link: applink,
+                name: appname
+            });
+            window.localStorage.setItem("config", JSON.stringify(config));
+            document.querySelector("#addAppDialog").close();
+        }
+        function showDelDiag() {
+            document.querySelector("#deleteAppDialog").showModal();
+            document.querySelector("#deleteAppDialog .apps").innerHTML = "";
+            window.config.apps.forEach(app => {
+                var li = document.createElement("button");
+                li.innerHTML = app.name;
+                li.onclick = function () {
+                    var app = window.config.apps.find(app => app.name == li.innerHTML);
+                    var taskbar = document.querySelector(".taskbar");
+                    var appdiv = document.querySelector("#" + app.id);
+                    taskbar.removeChild(appdiv);
+                    window.config.apps = window.config.apps.filter(app => app.name != li.innerHTML);
+                    window.localStorage.setItem("config", JSON.stringify(window.config));
+                    document.querySelector("#deleteAppDialog").close();
+                }
+                document.querySelector("#deleteAppDialog .apps").appendChild(li);
+            });
+        }
+    </script>
+</body>
+
+</html>

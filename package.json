@@ -1,0 +1,14 @@
+{
+  "name": "appdash",
+  "version": "1.0.0",
+  "description": "appdash, a simple dashboard for webapps",
+  "main": "index.js",
+  "scripts": {
+    "start": "electron index.js"
+  },
+  "author": "NovaFurry (novafurry.win)",
+  "license": "MIT",
+  "dependencies": {
+    "electron": "^31.2.1"
+  }
+}
